@@ -1,0 +1,94 @@
+classDiagram
+direction TB
+class Biblioteca {
+  -nombre: String
+  -materiales: List~MaterialBibliografico~
+  -usuarios: List~Usuario~
+  -historial: List~Prestamo~
+  +agregarMaterial(m: MaterialBibliografico) void
+  +registrarUsuario(u: Usuario) void
+  +buscarMaterial(codigo: String) MaterialBibliografico
+  +buscarUsuario(documento: String) Usuario
+  +materialesDisponibles() List
+  +inventarioPorTipo() Map
+  +catalogo() List~String~
+  +prestar(codigo, documento, fecha) Prestamo
+  +devolver(codigo, fecha) long
+}
+class MaterialBibliografico {
+  <<abstract>>
+  -codigo: String
+  -titulo: String
+  -anio: int
+  -disponible: boolean
+  #MaterialBibliografico(codigo, titulo, anio)
+  +getTipo()* String
+  +getDiasPrestamo()* int
+  +getMultaPorDia()* long
+  #detalle()* String
+  +marcarPrestado() void
+  +marcarDevuelto() void
+  +getDescripcion() String
+}
+class Libro {
+  -autor: String
+  -paginas: int
+  +getTipo() String
+  +getDiasPrestamo() int  «15»
+  +getMultaPorDia() long  «1000»
+}
+class Revista {
+  -numeroEdicion: int
+  +getTipo() String
+  +getDiasPrestamo() int  «7»
+  +getMultaPorDia() long  «500»
+}
+class Dvd {
+  -director: String
+  -duracionMinutos: int
+  +getTipo() String
+  +getDiasPrestamo() int  «3»
+  +getMultaPorDia() long  «2000»
+}
+class Usuario {
+  <<abstract>>
+  -documento: String
+  -nombre: String
+  -prestamosActivos: List~Prestamo~
+  +getTipo()* String
+  +getMaxPrestamos()* int
+  +getDiasExtra() int
+  +aplicarDescuento(multa: long) long
+  +puedePrestar() boolean
+  ~agregarPrestamo(p: Prestamo) void
+  ~quitarPrestamo(p: Prestamo) void
+}
+class Estudiante {
+  -programa: String
+  +getMaxPrestamos() int  «3»
+}
+class Docente {
+  -facultad: String
+  +getMaxPrestamos() int  «5»
+  +getDiasExtra() int  «7»
+  +aplicarDescuento(multa: long) long  «50 %»
+}
+class Prestamo {
+  -fechaPrestamo: LocalDate
+  -fechaLimite: LocalDate
+  -fechaDevolucion: LocalDate
+  ~Prestamo(material, usuario, fecha)
+  +estaActivo() boolean
+  +diasDeRetraso(fecha) long
+  +calcularMulta(fecha) long
+}
+Biblioteca "1" o-- "0..*" MaterialBibliografico : agregación
+Biblioteca "1" o-- "0..*" Usuario : agregación
+Biblioteca "1" *-- "0..*" Prestamo : composición
+MaterialBibliografico <|-- Libro
+MaterialBibliografico <|-- Revista
+MaterialBibliografico <|-- Dvd
+Usuario <|-- Estudiante
+Usuario <|-- Docente
+Prestamo "0..*" --> "1" MaterialBibliografico : material
+Prestamo "0..*" --> "1" Usuario : usuario

@@ -1,0 +1,27 @@
+sequenceDiagram
+actor B as Bibliotecario
+participant Bib as :Biblioteca
+participant M as material:MaterialBibliografico
+participant U as usuario:Usuario
+participant P as p:Prestamo
+B->>Bib: prestar(codigo, documento, fecha)
+Bib->>Bib: buscarMaterial(codigo)
+Bib->>Bib: buscarUsuario(documento)
+alt material o usuario no existe
+  Bib-->>B: IllegalArgumentException
+end
+Bib->>U: puedePrestar()
+U->>U: getMaxPrestamos() [Estudiante 3 / Docente 5]
+U-->>Bib: true / false
+alt llegó a su límite
+  Bib-->>B: IllegalStateException
+end
+Bib->>M: marcarPrestado()
+Note right of M: falla si ya está prestado
+Bib->>P: new Prestamo(material, usuario, fecha)
+P->>M: getDiasPrestamo() [Libro 15 / Revista 7 / DVD 3]
+P->>U: getDiasExtra() [Estudiante 0 / Docente 7]
+P->>P: fechaLimite = fecha + días + extra
+Bib->>U: agregarPrestamo(p)
+Bib->>Bib: historial.add(p)
+Bib-->>B: p (préstamo con su fecha límite)
